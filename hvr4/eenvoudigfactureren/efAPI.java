@@ -145,6 +145,7 @@ public class efAPI{
  public Type listType_clients=null;
  public Type listType_quotes=null; 
  public Type listType_invoices=null; 
+ public Type listType_activities=null; 
 
  public efAPI(String username,String password){
   super();
@@ -166,6 +167,7 @@ public class efAPI{
   listType_clients=new TypeToken<ArrayList<efClientsBean>>(){}.getType();
   listType_quotes=new TypeToken<ArrayList<efQuotesBean>>(){}.getType();
   listType_invoices=new TypeToken<ArrayList<efInvoicesBean>>(){}.getType();
+  listType_activities=new TypeToken<List<efActivitiesBean>>(){}.getType();
  }//efAPI constructor
 
  //invoices
@@ -192,7 +194,30 @@ public class efAPI{
 
  public efInvoicesBean doPostInvoice(efInvoicesBean invoice) throws Exception{
   efInvoicesBean rv=null;
+  //todo put checks in function apart
   if(invoice.days_due==0) invoice.days_due=30;//zet hier default uit settings
+  if(invoice.items!=null){
+   for(int i=0;i<invoice.items.size();i++){
+    efInvoicesItemsBean eiib=invoice.items.get(i);
+    eiib.item_id=0l;
+    eiib.uri="";
+   }
+  }//
+  if(invoice.payments!=null){
+   for(int i=0;i<invoice.payments.size();i++){
+    efInvoicesPaymentsBean eipb=invoice.payments.get(i);
+    eipb.payment_id=0l;
+    eipb.uri="";
+   }
+  }//
+  if(invoice.remarks!=null){
+   for(int i=0;i<invoice.remarks.size();i++){
+    efInvoicesRemarksBean eirb=invoice.remarks.get(i);
+    eirb.remark_id=0l;
+    eirb.uri="";
+   }
+  }//
+
   String json_line=gson.toJson(invoice);
   logger.finest("json_line="+json_line);
   String e_c=doPostInvoice(json_line);
@@ -253,6 +278,23 @@ public class efAPI{
   return(rv);
  }//getInvoice
 
+  public efInvoicesBean getInvoicesBeanFromJson(String json_line){
+  efInvoicesBean rv=null;
+  if(json_line.startsWith("[")){
+   ArrayList<efInvoicesBean> dummy=gson.fromJson(json_line,listType_invoices);
+   if(dummy.size()==1){
+    rv=dummy.get(0);
+   }//
+   else{
+   logger.warning("size<>1 ("+dummy.size()+") bean in "+json_line);
+   }//>0
+  }//[
+  else{
+   rv=gson.fromJson(json_line,efInvoicesBean.class);
+  }
+  return(rv);
+ }//getInvoicesBeanFromJson
+
  //invoices
 
  public String efQuotesBeanToJson(efQuotesBean eqb){
@@ -274,6 +316,21 @@ public class efAPI{
  public efQuotesBean doPostQuote(efQuotesBean quote) throws Exception{
   efQuotesBean rv=null;
   if(quote.days_valid==0) quote.days_valid=30;
+  //todo checks in function apart
+  if(quote.items!=null){
+   for(int i=0;i<quote.items.size();i++){
+    efQuotesItemsBean eqib=quote.items.get(i);
+    eqib.item_id=0l;
+    eqib.uri="";
+   }
+  }//
+  if(quote.remarks!=null){
+   for(int i=0;i<quote.remarks.size();i++){
+    efQuotesRemarksBean eqrb=quote.remarks.get(i);
+    eqrb.remark_id=0l;
+    eqrb.uri="";
+   }
+  }//
   String json_line=gson.toJson(quote);
   String e_c=doPostQuote(json_line);
   efQuotesResultBean eqprb=gson.fromJson(e_c,efQuotesResultBean.class);
@@ -303,12 +360,22 @@ public class efAPI{
    efClientsBean rv=null;
    client.client_id=0l;
    client.uri="";
-   for(int i=0;i<client.details.size();i++){
-    efDetailsBean edb=client.details.get(i);
-    edb.detail_id=0l;
-    edb.client_id=0l;
-    edb.uri="";
-   }//for
+   if(client.contacts!=null){
+    for(int i=0;i<client.contacts.size();i++){
+     efContactsBean ent=client.contacts.get(i);
+     ent.contact_id=0l;
+     ent.client_id=0l;
+     ent.uri="";
+    }
+   }//not null
+   if(client.details!=null){
+    for(int i=0;i<client.details.size();i++){
+     efDetailsBean edb=client.details.get(i);
+     edb.detail_id=0l;
+     edb.client_id=0l;
+     edb.uri="";
+    }//for
+   }//not null
    String json_line=gson.toJson(client);
    String uri_s=ef_api_url_s+$clients+"?"+$format_json;
    String e_c=doHttpPost(json_line,uri_s);
@@ -342,34 +409,37 @@ public class efAPI{
   return(rv);
  }//doPutClient
 
- public efClientsBean getClientFromJson(String json_line){
+ public efClientsBean getClientsBeanFromJson(String json_line){
   efClientsBean rv=null;
-  rv=gson.fromJson(json_line,efClientsBean.class);
+  if(json_line.startsWith("[")){
+   ArrayList<efClientsBean> dummy=gson.fromJson(json_line,listType_clients);
+   if(dummy.size()==1){
+    rv=dummy.get(0);
+   }//
+   else{
+   logger.warning("size<>1 ("+dummy.size()+") bean in "+json_line);
+   }//>0
+  }//[
+  else{
+   rv=gson.fromJson(json_line,efClientsBean.class);
+  }
   return(rv);
- }//getClientFromJson
+ }//getClientsBeanFromJson
 
  public ArrayList<efClientsBean> getClients() throws Exception{
   ArrayList<efClientsBean> rv=null;
   String uri_s=ef_api_url_s+$clients+"?"+$format_json+"&sort=number";//number todo eerst sort dan dormat?
   String e_c=doHttpGet(uri_s);
-
   Type listType=new TypeToken<ArrayList<efClientsBean>>(){}.getType();
   rv=gson.fromJson(e_c,listType);
+  logger.finest("rv.size="+rv.size());
   return(rv);
  }//getClients
 
  public efClientsBean getClient(String uri_s) throws Exception{
   efClientsBean rv=null;
   String e_c=getJsonClient(uri_s);
-  if(e_c.startsWith("[")){
-   ArrayList<efClientsBean> dummy=gson.fromJson(e_c,listType_clients);
-   if(dummy.size()==1){
-    rv=dummy.get(0);
-   }
-  }//[
-  else{
-   rv=gson.fromJson(e_c,efClientsBean.class);
-  }
+  rv=getClientsBeanFromJson(e_c);
   return(rv);
  }//getClient
 
@@ -395,6 +465,7 @@ public class efAPI{
  public efClientsBean getClientByNumber(String number) throws Exception{
   efClientsBean rv=null;
   String uri_s=ef_api_url_s+$clients+"?"+$format_json+"&filter=number="+number;
+  logger.finest("uri_s="+uri_s);
   rv=getClient(uri_s);
   return(rv);
  }//getClientByNumber
@@ -439,40 +510,46 @@ public class efAPI{
   return(rv);
  }//getQuotes 
 
+  public efQuotesBean getQuotesBeanFromJson(String json_line){
+  efQuotesBean rv=null;
+  if(json_line.startsWith("[")){
+   ArrayList<efQuotesBean> dummy=gson.fromJson(json_line,listType_quotes);
+   if(dummy.size()==1){
+    rv=dummy.get(0);
+   }//
+   else{
+   logger.warning("size<>1 ("+dummy.size()+") bean in "+json_line);
+   }//>0
+  }//[
+  else{
+   rv=gson.fromJson(json_line,efQuotesBean.class);
+  }
+  return(rv);
+ }//getQuotesBeanFromJson
+
  public List<efActivitiesBean> getActivities() throws Exception{
   List<efActivitiesBean> rv=null;
-  //String uri_s=ef_api_url_s+$activities+"?"+$format_json+"&sort=-date";//does not seem to work
   String uri_s=ef_api_url_s+$activities+"?"+$format_json;//sort not possible
   //todo put this in subroutine expected type [ or single
-  HttpGet httpget=new HttpGet(uri_s);
-  RequestLine rqln=httpget.getRequestLine();
-  CloseableHttpResponse response=httpclient.execute(host,httpget,localContext);
-  StatusLine rsl=response.getStatusLine();
-  int sc=rsl.getStatusCode();
-  if(sc!=200){throw(new RuntimeException("sc="+sc+" rqln="+rqln));}
-  HttpEntity entity=response.getEntity();
-  if(entity==null){throw(new RuntimeException("entity==null"));}
-  Header ct=entity.getContentType();
-  String e_c=readEntity(entity);
-  EntityUtils.consume(entity);
-  response.close();
-  //logger.info("e_c="+e_c);
-  if(! e_c.startsWith("[")){throw(new RuntimeException("e_c not [ "+e_c+" rqln="+rqln));}
-  //todo until here in subroutine
-  //GsonBuilder gbld=new GsonBuilder();
-  //gbld.setDateFormat(sdfx_pattern);
-  //Gson gson=gbld.create();
-  Type listType=new TypeToken<List<efActivitiesBean>>(){}.getType();
-  rv=gson.fromJson(e_c,listType);
+  String e_c=doHttpGet(uri_s);
+  rv=gson.fromJson(e_c,listType_activities);
   return(rv);
  }//getActivities()
 
  public HashMap<String,Long> numberToId() throws Exception{
+  //if clients with nummber "" or number "null" -> n2id contains less entries than there are clients
   HashMap<String,Long> rv=new HashMap<String,Long>();
   ArrayList<efClientsBean> ecbs=getClients();
   for(int i=0;i<ecbs.size();i++){
    efClientsBean ecb=ecbs.get(i);
-   rv.put(ecb.number,new Long(ecb.client_id));
+   Long id_l=new Long(ecb.client_id);
+   Long dummy=rv.get(ecb.number);
+   if(dummy==null){
+    rv.put(ecb.number,id_l);
+   }
+   else{
+    logger.warning("n2id contains already *"+ecb.number+"* for key "+id_l);
+   }
   }//for
   return(rv); 
  }//numberToId

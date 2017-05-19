@@ -35,13 +35,14 @@ javac test_efAPI.java
 Than you can execute e.g.  
  java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain activities -action get   
 
-
 There is also a jar , efAPI.jar , in lib which can directly be used  
 java  -jar lib/efAPI.jar -username demo@eenvoudigfactureren.be -password demo -domain activities -action get  
 
-
 efAPI.jar has been constructed by:  
 jar cmf test_efAPI.manifest lib/efAPI.jar test_efAPI.class hvr4/eenvoudigfactureren/*.class  
+
+
+Further example calls can be found at the top of the file test_efAPI.java
 
 
 

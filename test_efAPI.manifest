@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Main-Class: test_efAPI
+Class-Path: ./httpcore-4.4.6.jar ./httpclient-4.5.3.jar ./commons-logging-1.2.jar ./commons-codec-1.10.jar ./gson-2.8.0.jar
+
+

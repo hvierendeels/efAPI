@@ -33,7 +33,10 @@ public class efClientsBean{
   sb.append("efClientsBean:");
   sb.append("client_id="+client_id);
   sb.append(";");
-  sb.append("number="+number);
+  String number_expression;
+  if(number==null){number_expression="null";}
+  else            {number_expression="\""+number+"\"";}
+  sb.append("number="+number_expression);
   sb.append(";");
   sb.append("name="+name);
   sb.append(";");

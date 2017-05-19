@@ -10,8 +10,8 @@ The java code uses apache HttpClient for communication and google Gson for conve
 Following extra libs are needed   
 httpcore-4.4.6.jar   
 httpclient-4.5.3.jar   
-commons-logging-1.2.jar   
-commons-codec-1.10.jar   
+ commons-logging-1.2.jar   
+ commons-codec-1.10.jar   
 gson-2.8.0.jar   
 
 
@@ -25,3 +25,6 @@ javac *.java
 
 
 export CLASSPATH=./:../../:../../lib/commons-codec-1.10.jar:../../lib/commons-logging-1.2.jar:../../lib/gson-2.8.0.jar:../../lib/httpclient-4.5.3.jar:../../lib/httpcore-4.4.6.jar  
+
+
+jar cmf test_efAPI.manifest lib/efAPI.jar hvr4

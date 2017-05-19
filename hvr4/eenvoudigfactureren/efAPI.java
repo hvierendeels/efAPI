@@ -194,6 +194,7 @@ public class efAPI{
 
  public efInvoicesBean doPostInvoice(efInvoicesBean invoice) throws Exception{
   efInvoicesBean rv=null;
+  String e_c=null;
   //todo put checks in function apart
   if(invoice.days_due==0) invoice.days_due=30;//zet hier default uit settings
   if(invoice.items!=null){
@@ -220,7 +221,16 @@ public class efAPI{
 
   String json_line=gson.toJson(invoice);
   logger.finest("json_line="+json_line);
-  String e_c=doPostInvoice(json_line);
+
+  String uri_s=ef_api_url_s+$invoices+"?"+$format_json;
+  e_c=doHttpPost(json_line,uri_s);
+  //{"error":"structured_message too short"}
+  //{"error":"amount can not be 0.00"}
+  //{"code":400,"error":"Syntax error"} todo sc=200 in this case!!  
+  //{"success":"invoice created","invoice_id":"145786","uri":"https:\/\/eenvoudigfactureren.be\/api\/v1\/invoices\/145786"}
+  logger.finest("e_c="+e_c);
+  //String e_c=doPostInvoice(json_line);
+
   efInvoicesResultBean eirb=gson.fromJson(e_c,efInvoicesResultBean.class);
   if(eirb.success.equals($invoice_created)){
    rv=getInvoice(eirb.invoice_id);  
@@ -231,7 +241,9 @@ public class efAPI{
   return(rv);
  }//doPostInvoice
 
- public String doPostInvoice(String json_line) throws Exception{
+ /********************
+ //public String doPostInvoice(String json_line) throws Exception{
+ private String doPostInvoice(String json_line) throws Exception{
   String rv=null;
   logger.finest("json_line="+json_line);
   String uri_s=ef_api_url_s+$invoices+"?"+$format_json;
@@ -243,6 +255,7 @@ public class efAPI{
   logger.finest("rv="+rv);
   return(rv);
  }//doPostInvoice
+ *****/
 
  public List<efInvoicesBean> getInvoices() throws Exception{
   List<efInvoicesBean> rv=null;
@@ -297,12 +310,14 @@ public class efAPI{
 
  //invoices
 
+ //quotes
  public String efQuotesBeanToJson(efQuotesBean eqb){
   String eqb_json=gson.toJson(eqb);
   return(eqb_json);
  }//efQuotesBeanToJson
 
- public String doPostQuote(String json_line) throws Exception{
+ /************************
+ private String doPostQuote(String json_line) throws Exception{
   String rv=null;
   logger.finest("json_line="+json_line);
   String uri_s=ef_api_url_s+$quotes+"?"+$format_json;
@@ -312,9 +327,11 @@ public class efAPI{
   //{"error":"number not unique"}
   //{"error":"items cannot be empty"}
  }//doPostQuote
+ *************************/
 
  public efQuotesBean doPostQuote(efQuotesBean quote) throws Exception{
   efQuotesBean rv=null;
+  String e_c=null;
   if(quote.days_valid==0) quote.days_valid=30;
   //todo checks in function apart
   if(quote.items!=null){
@@ -332,7 +349,10 @@ public class efAPI{
    }
   }//
   String json_line=gson.toJson(quote);
-  String e_c=doPostQuote(json_line);
+  //String e_c=doPostQuote(json_line);
+  String uri_s=ef_api_url_s+$quotes+"?"+$format_json;
+  e_c=doHttpPost(json_line,uri_s);
+
   efQuotesResultBean eqprb=gson.fromJson(e_c,efQuotesResultBean.class);
   rv=getQuote(eqprb.quote_id);  
   return(rv);
@@ -354,6 +374,47 @@ public class efAPI{
    }//else
   return(rv);
  }//doPutQuote
+
+ public String getQuoteAsJson(long quote_id) throws Exception{
+  String rv=null;
+  String uri_s=ef_api_url_s+$quotes+"/"+quote_id+"?"+$format_json;
+  rv=doHttpGet(uri_s);
+  return(rv);
+ }//getQuoteAsJson
+
+ public efQuotesBean getQuote(long quote_id) throws Exception{
+  efQuotesBean rv=null;
+  String e_c=getQuoteAsJson(quote_id);
+  logger.finest("e_c="+e_c);
+  rv=gson.fromJson(e_c,efQuotesBean.class);
+  return(rv);
+ }//getQuote
+
+ public List<efQuotesBean> getQuotes() throws Exception{
+  List<efQuotesBean> rv=null;
+  String uri_s=ef_api_url_s+$quotes+"?"+$format_json+"&sort=-quote_id";//this sort works!
+  String e_c=doHttpGet(uri_s);
+  rv=gson.fromJson(e_c,listType_quotes);
+  return(rv);
+ }//getQuotes 
+
+  public efQuotesBean getQuotesBeanFromJson(String json_line){
+  efQuotesBean rv=null;
+  if(json_line.startsWith("[")){
+   ArrayList<efQuotesBean> dummy=gson.fromJson(json_line,listType_quotes);
+   if(dummy.size()==1){
+    rv=dummy.get(0);
+   }//
+   else{
+   logger.warning("size<>1 ("+dummy.size()+") bean in "+json_line);
+   }//>0
+  }//[
+  else{
+   rv=gson.fromJson(json_line,efQuotesBean.class);
+  }
+  return(rv);
+ }//getQuotesBeanFromJson
+ //quotes
  //
  //clients
  public efClientsBean doPostClient(efClientsBean client) throws Exception{
@@ -487,45 +548,6 @@ public class efAPI{
  }//deleteClientById
  //clients
 
- public String getQuoteAsJson(long quote_id) throws Exception{
-  String rv=null;
-  String uri_s=ef_api_url_s+$quotes+"/"+quote_id+"?"+$format_json;
-  rv=doHttpGet(uri_s);
-  return(rv);
- }//getQuoteAsJson
-
- public efQuotesBean getQuote(long quote_id) throws Exception{
-  efQuotesBean rv=null;
-  String e_c=getQuoteAsJson(quote_id);
-  logger.finest("e_c="+e_c);
-  rv=gson.fromJson(e_c,efQuotesBean.class);
-  return(rv);
- }//getQuote
-
- public List<efQuotesBean> getQuotes() throws Exception{
-  List<efQuotesBean> rv=null;
-  String uri_s=ef_api_url_s+$quotes+"?"+$format_json+"&sort=-quote_id";//this sort works!
-  String e_c=doHttpGet(uri_s);
-  rv=gson.fromJson(e_c,listType_quotes);
-  return(rv);
- }//getQuotes 
-
-  public efQuotesBean getQuotesBeanFromJson(String json_line){
-  efQuotesBean rv=null;
-  if(json_line.startsWith("[")){
-   ArrayList<efQuotesBean> dummy=gson.fromJson(json_line,listType_quotes);
-   if(dummy.size()==1){
-    rv=dummy.get(0);
-   }//
-   else{
-   logger.warning("size<>1 ("+dummy.size()+") bean in "+json_line);
-   }//>0
-  }//[
-  else{
-   rv=gson.fromJson(json_line,efQuotesBean.class);
-  }
-  return(rv);
- }//getQuotesBeanFromJson
 
  public List<efActivitiesBean> getActivities() throws Exception{
   List<efActivitiesBean> rv=null;
@@ -659,7 +681,6 @@ public class efAPI{
   logger.finest("rv="+rv);
   return(rv);
  }//doHttpGet
-
 
  public void close() throws Exception {
   if(httpclient!=null){

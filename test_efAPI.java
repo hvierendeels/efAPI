@@ -1,6 +1,4 @@
-// org/apache/commons/codec/binary/Base64 needed by org.apache.http.impl.auth.BasicScheme.authenticate
-// org/apache/commons/logging/LogFactory  needed by org.apache.http.conn.ssl.DefaultHostnameVerifier
-
+//herman vierendeels,may 2017,belgium
 //export CLASSPATH=./:/home/tshvr/my/:/opt/httpcomponents-core-4.4.6/lib/httpcore-4.4.6.jar:/opt/httpcomponents-client-4.5.3/lib/httpclient-4.5.3.jar:/opt/commons-logging-1.2/commons-logging-1.2.jar:/opt/commons-codec-1.10/commons-codec-1.10.jar:/opt/gson-2.8.0.jar
 //  -Djava.util.logging.config.file=logging.properties
 //java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain activities -action get

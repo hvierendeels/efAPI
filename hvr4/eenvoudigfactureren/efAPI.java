@@ -1,3 +1,4 @@
+//herman vierendeels,may 2017,belgium
 package hvr4.eenvoudigfactureren;
 
 import java.io.BufferedReader;

@@ -8,6 +8,8 @@ import java.util.List;
 
 public class efClientsResultBean{
  public String success;
+ public String error;
  public long client_id;
+ public int code;
  public String uri; 
 }//efClientstResultBean

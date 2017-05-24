@@ -175,7 +175,7 @@ public class test_efAPI{
       ecb.phone_number=phone_number_trimmed;
       ecb1=ef_api.doPutClient(ecb);
       System.out.println(ecb1);
-      if(j==20) break;
+      if(j==30) break;
      }//if
     }//for
     System.exit(0);

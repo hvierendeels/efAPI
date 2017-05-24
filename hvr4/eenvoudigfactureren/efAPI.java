@@ -66,6 +66,7 @@ import org.apache.http.HttpHeaders;
 
 import hvr4.eenvoudigfactureren.efActivitiesBean;
 import hvr4.eenvoudigfactureren.efClientsBean;
+import hvr4.eenvoudigfactureren.efClientsResultBean;
 import hvr4.eenvoudigfactureren.efContactsBean;
 import hvr4.eenvoudigfactureren.efDetailsBean;
 import hvr4.eenvoudigfactureren.efInvoicesBean;
@@ -93,6 +94,7 @@ public class efAPI{
  public static final String $invoice_created="invoice created";
  public static final String $invoice_updated="invoice updated";
  public static final String $quotes="quotes";
+ public static final String $quote_created="quote created";
  public static final String $quote_updated="quote updated";
  public static final String $activities="activities";
  public static final String $format_json="format=json";
@@ -184,7 +186,7 @@ public class efAPI{
   String e_c=doHttpPut(json_line,uri_s);
   logger.finest("e_c="+e_c);
   efInvoicesResultBean eirb=gson.fromJson(e_c,efInvoicesResultBean.class);
-  if(eirb.success.equals($invoice_updated)){
+  if($invoice_updated.equals(eirb.success)){
     rv=getInvoice(invoice.invoice_id);
    }//success
    else{
@@ -230,10 +232,9 @@ public class efAPI{
   //{"code":400,"error":"Syntax error"} todo sc=200 in this case!!  
   //{"success":"invoice created","invoice_id":"145786","uri":"https:\/\/eenvoudigfactureren.be\/api\/v1\/invoices\/145786"}
   logger.finest("e_c="+e_c);
-  //String e_c=doPostInvoice(json_line);
 
   efInvoicesResultBean eirb=gson.fromJson(e_c,efInvoicesResultBean.class);
-  if(eirb.success.equals($invoice_created)){
+  if($invoice_created.equals(eirb.success)){
    rv=getInvoice(eirb.invoice_id);  
   }//success
   else{
@@ -241,22 +242,6 @@ public class efAPI{
   }//else
   return(rv);
  }//doPostInvoice
-
- /********************
- //public String doPostInvoice(String json_line) throws Exception{
- private String doPostInvoice(String json_line) throws Exception{
-  String rv=null;
-  logger.finest("json_line="+json_line);
-  String uri_s=ef_api_url_s+$invoices+"?"+$format_json;
-  rv=doHttpPost(json_line,uri_s);
-  //{"error":"structured_message too short"}
-  //{"error":"amount can not be 0.00"}
-  //{"code":400,"error":"Syntax error"} todo sc=200 in this case!!  
-  //{"success":"invoice created","invoice_id":"145786","uri":"https:\/\/eenvoudigfactureren.be\/api\/v1\/invoices\/145786"}
-  logger.finest("rv="+rv);
-  return(rv);
- }//doPostInvoice
- *****/
 
  public List<efInvoicesBean> getInvoices() throws Exception{
   List<efInvoicesBean> rv=null;
@@ -317,24 +302,12 @@ public class efAPI{
   return(eqb_json);
  }//efQuotesBeanToJson
 
- /************************
- private String doPostQuote(String json_line) throws Exception{
-  String rv=null;
-  logger.finest("json_line="+json_line);
-  String uri_s=ef_api_url_s+$quotes+"?"+$format_json;
-  rv=doHttpPost(json_line,uri_s);
-  return(rv);
-  //{"success":"quote created","quote_id":"145604","uri":"https:\/\/eenvoudigfactureren.be\/api\/v1\/quotes\/145604"}
-  //{"error":"number not unique"}
-  //{"error":"items cannot be empty"}
- }//doPostQuote
- *************************/
 
  public efQuotesBean doPostQuote(efQuotesBean quote) throws Exception{
   efQuotesBean rv=null;
   String e_c=null;
-  if(quote.days_valid==0) quote.days_valid=30;
   //todo checks in function apart
+  if(quote.days_valid==0) quote.days_valid=30;
   if(quote.items!=null){
    for(int i=0;i<quote.items.size();i++){
     efQuotesItemsBean eqib=quote.items.get(i);
@@ -350,12 +323,18 @@ public class efAPI{
    }
   }//
   String json_line=gson.toJson(quote);
-  //String e_c=doPostQuote(json_line);
   String uri_s=ef_api_url_s+$quotes+"?"+$format_json;
   e_c=doHttpPost(json_line,uri_s);
-
-  efQuotesResultBean eqprb=gson.fromJson(e_c,efQuotesResultBean.class);
-  rv=getQuote(eqprb.quote_id);  
+  efQuotesResultBean eqrb=gson.fromJson(e_c,efQuotesResultBean.class);
+  //{"success":"quote created","quote_id":"145604","uri":"https:\/\/eenvoudigfactureren.be\/api\/v1\/quotes\/145604"}
+  //{"error":"number not unique"}
+  //{"error":"items cannot be empty"}
+  if($quote_created.equals(eqrb.success)){
+   rv=getQuote(eqrb.quote_id);  
+  }//success
+  else{
+   logger.warning("quote "+quote+" e_c="+e_c);
+  }//else
   return(rv);
  }//doPostQuote
 
@@ -367,7 +346,7 @@ public class efAPI{
   logger.finest("e_c="+e_c);
   // e_c={"success":"quote updated"}
   efQuotesResultBean eqrb=gson.fromJson(e_c,efQuotesResultBean.class);
-  if(eqrb.success.equals($quote_updated)){
+  if($quote_updated.equals(eqrb.success)){
     rv=getQuote(quote.quote_id);
    }//success
    else{
@@ -446,11 +425,11 @@ public class efAPI{
    //Exception in thread "main" java.lang.RuntimeException: doPost sc=400 rqln=POST https://eenvoudigfactureren.be/api/v1/clients?format=json HTTP/1.1 rv={"error":"phone_number too long"}
    //Exception in thread "main" java.lang.RuntimeException: doPostClient sc=200 rqln=POST https://eenvoudigfactureren.be/api/v1/clients?format=json HTTP/1.1 e_c={"code":400,"error":"Malformed UTF-8 characters, possibly incorrectly encoded"} ckey 65 ?
    efClientsResultBean ecrb=gson.fromJson(e_c,efClientsResultBean.class);
-   if(ecrb.success.equals($client_created)){
+   if($client_created.equals(ecrb.success)){//in case of error , ecrb.success==null!!
     rv=getClientById(ecrb.client_id);
    }//success
    else{
-    logger.warning("client "+client+" e_c="+e_c);
+    logger.warning("client "+client+" e_c="+e_c+" error="+ecrb.error);
    }//else
    return(rv);
  }//doPostClient
@@ -462,7 +441,7 @@ public class efAPI{
   String e_c=doHttpPut(json_line,uri_s);
   logger.finest("e_c="+e_c);
   efClientsResultBean ecrb=gson.fromJson(e_c,efClientsResultBean.class);
-  if(ecrb.success.equals($client_updated)){
+  if($client_updated.equals(ecrb.success)){
    rv=getClientById(client.client_id);
   }//success
   else{
@@ -542,7 +521,7 @@ public class efAPI{
   String e_c=doHttpDelete(uri_s);
   logger.finest("e_c="+e_c);//INFO: e_c={"success":"client removed"}
   efClientsResultBean ecrb=gson.fromJson(e_c,efClientsResultBean.class);
-  if(ecrb.success.equals($client_removed)){}//success
+  if($client_removed.equals(ecrb.success)){}//success
   else{
    logger.warning("client "+client_id+" e_c="+e_c);
   }//else
@@ -627,7 +606,8 @@ public class efAPI{
   if(sc==201){
   }//201
   else{
-   throw(new RuntimeException("doPost sc="+sc+" rqln="+rqln+" rsl="+rsl+" e_c="+e_c+" json_text="+json_text));
+   //throw(new RuntimeException("doPost sc="+sc+" rqln="+rqln+" rsl="+rsl+" e_c="+e_c+" json_text="+json_text));
+   logger.warning("doPost sc="+sc+" rqln="+rqln+" rsl="+rsl+" e_c="+e_c+" json_text="+json_text);//test let error flow back
   }
   return(e_c);
  }//doHttpPost

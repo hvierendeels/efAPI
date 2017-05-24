@@ -2,7 +2,7 @@
 herman vierendeels,may 2017,belgium  
 
 eenvoudigfactureren.be is a belgian invoicing service.  
-They provide an api to handle clients, invoices, quotes ,stockitems and more.  
+They provide an api (REST) to handle clients, invoices, quotes ,stockitems and more.  
 This project contains code and json-texts to demonstrate some use of their api in java.  
 
 The java code uses apache HttpClient for communication and google Gson for conversion from/to json--javabean.  

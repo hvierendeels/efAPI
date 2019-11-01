@@ -3,13 +3,13 @@
 //  -Djava.util.logging.config.file=logging.properties
 //java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain activities -action get
 //java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain clients -action get
-//java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain clients -action get -id 92 -format json
-//java test_efApi -username demo@eenvoudigfactureren.be -password demo -domain clients -action get -number ''
+//java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain clients -action get -id 258359 -format json
+//java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain clients -action get -number ''
 //java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain clients -action jsontest -json_file client_good.txt
 //java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain clients -action post -json_file client_good.txt
 //java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain clients -action trim_some_fields
 //java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain numberToId
-//java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain invoices -action get
+//java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain invoices -action get   //nog doen type<> invoice
 //java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain invoices -action get -id 14
 //java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain invoices -action get -number 2017-0001
 //java test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain invoices -action blank_note -number 2017-0001
@@ -21,6 +21,18 @@
 
 
 //if password xxxx:Exception in thread "main" java.lang.RuntimeException: sc=401 rqln=GET https://eenvoudigfactureren.be/api/v1/clients?format=json&filter=number=1 HTTP/1.1
+
+//Exception in thread "main" javax.net.ssl.SSLHandshakeException: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+//trustStore is: /opt/jdk1.7.0_03/jre/lib/security/cacerts
+//trustStore type is : jks
+//https://stackoverflow.com/questions/6908948/java-sun-security-provider-certpath-suncertpathbuilderexception-unable-to-find
+//http://magicmonster.com/kb/prg/java/ssl/pkix_path_building_failed.html
+//export certificats from browser
+//cp -i /opt/jdk1.7.0_03/jre/lib/security/cacerts /temp/
+//keytool -list -v -keystore /temp/cacerts
+//keytool -import -alias USERTrustRSACertificationAuthority -keystore /temp/cacerts -file USERTrustRSACertificationAuthority.crt
+//keytool -import -alias USERTrustRSACertificationAuthority -keystore /opt/jdk1.7.0_03/jre/lib/security/cacerts -file USERTrustRSACertificationAuthority.crt
+//java  -Djavax.net.debug=SSL -Djavax.net.ssl.trustStore=/temp/cacerts test_efAPI -username demo@eenvoudigfactureren.be -password demo -domain clients -action get
 
 import java.io.File;
 import java.io.BufferedReader;

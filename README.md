@@ -41,8 +41,7 @@ java  -jar lib/efAPI.jar -username demo@eenvoudigfactureren.be -password demo -d
 efAPI.jar has been constructed by:  
 jar cmf test_efAPI.manifest lib/efAPI.jar test_efAPI.class hvr4/eenvoudigfactureren/*.class  
 
+Remarks:
+2019-10: when retesting i found out that i had to import the USERTrustRSACertificationAuthority certificate into the java cacerts file.
 
 Further example calls can be found at the top of the file test_efAPI.java
-
-
-

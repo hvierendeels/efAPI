@@ -1,0 +1,11 @@
+.menu {
+  width: 120px;
+  /*box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.2);*/
+  position: relative;
+  display: none;
+  background-color: lightblue;
+}
+div.menu ul li:hover{background-color:green;}
+
+/*.List{visibility:collapse;display:none}*/
+.List{display:none;}
